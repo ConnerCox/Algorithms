@@ -1,1 +1,15 @@
-# Algorithms
+# Class Algorithms
+
+Your name, the school name, and the course name
+A description for why the repository exist (what files does it hold and why are they significant?)
+A personal bio
+A statement about why you are taking this program (what are you end goals?)
+
+### My name is Conner Cox
+
+* This repository exists as a hub for my assignments from my Algorithms Class at Southwest Tech.
+  * It holds assignments and programs related to my class.
+
+* I am interested in programming, software development, and artifical intelligences.
+
+* I am taking this program to further my knowledge of software development and programming. Ultimatly, I would enjoy working on a team of software engineers. 
