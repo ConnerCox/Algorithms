@@ -7,4 +7,4 @@
 
 * I am interested in programming, software development, and artifical intelligences.
 
-* I am taking this program to further my knowledge of software development and programming. Ultimatly, I would enjoy working on a team of software engineers. 
+* I am taking this program to further my knowledge of software development and programming. Ultimately, I would enjoy working on a team of software engineers.
