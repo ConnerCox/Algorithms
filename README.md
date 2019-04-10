@@ -1,10 +1,5 @@
 # Class Algorithms
 
-Your name, the school name, and the course name
-A description for why the repository exist (what files does it hold and why are they significant?)
-A personal bio
-A statement about why you are taking this program (what are you end goals?)
-
 ### My name is Conner Cox
 
 * This repository exists as a hub for my assignments from my Algorithms Class at Southwest Tech.
