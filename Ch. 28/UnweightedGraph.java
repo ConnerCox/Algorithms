@@ -1,20 +1,19 @@
-
 import java.util.*;
 
 public class UnweightedGraph<V> implements Graph<V> {
 	protected List<V> vertices = new ArrayList<>(); // Store vertices
 	protected List<List<Edge>> neighbors 
-		= new ArrayList<>(); // Adjacency lists
+	= new ArrayList<>(); // Adjacency lists
 
 	/** Construct an empty graph */
 	public UnweightedGraph() {
 	}
-	
+
 	/** Construct a graph from vertices and edges stored in arrays */
 	public UnweightedGraph(V[] vertices, int[][] edges) {
 		for (int i = 0; i < vertices.length; i++)
 			addVertex(vertices[i]);
-		
+
 		createAdjacencyLists(edges, vertices.length);
 	}
 
@@ -22,7 +21,7 @@ public class UnweightedGraph<V> implements Graph<V> {
 	public UnweightedGraph(List<V> vertices, List<Edge> edges) {
 		for (int i = 0; i < vertices.size(); i++)
 			addVertex(vertices.get(i));
-				
+
 		createAdjacencyLists(edges, vertices.size());
 	}
 
@@ -30,7 +29,7 @@ public class UnweightedGraph<V> implements Graph<V> {
 	public UnweightedGraph(List<Edge> edges, int numberOfVertices) {
 		for (int i = 0; i < numberOfVertices; i++) 
 			addVertex((V)(new Integer(i))); // vertices is {0, 1, ...}
-		
+
 		createAdjacencyLists(edges, numberOfVertices);
 	}
 
@@ -38,85 +37,8 @@ public class UnweightedGraph<V> implements Graph<V> {
 	public UnweightedGraph(int[][] edges, int numberOfVertices) {
 		for (int i = 0; i < numberOfVertices; i++) 
 			addVertex((V)(new Integer(i))); // vertices is {0, 1, ...}
-		
+
 		createAdjacencyLists(edges, numberOfVertices);
-	}
-	
-	/*
-	 * Algorithm for Exercise 28-3
-	 * public SearchTree dfsNonRecurs(int v) {
-	 *   int[] parent = new int[vertices.size()];
-	 *   for (int i = 0; i < parent.length; i++)
-	 *       parent[i] = -1; // Initialize parent[i] to -1
-	 *   boolean[] isVisited = new boolean[vertices.size()];
-	 *   List<Integer> searchOrder = new ArrayList<>();
-	 *   Stack<Integer> stack = new Stack<>();
-	 *
-	 *	 push v to the stack
-	 *	 add v to search order
-	 *   mark v visited
-	 *
-	 *   while (the stack is not empty) {
-	 *     peek a vertex from the stack, call x
-	 *     if (neighbors list for x equals size 0) {
-	 *	       pop a vertex from the stack
-	 *     }
-	 *     else {
-	 *         for (int i = all the vertices in x's neighbor list) {
-	 *             grab Egde at index i, call e
-	 *             remove ending vertex from x's neighbor list
-	 *             
-	 *             if (ending vertex of e is not visited) {
-	 *                 mark parent of ending vertex as x
-	 *                 push ending vertex onto stack
-	 *                 mark ending vertex as visited
-	 *                 add ending vertex to search order
-	 *                 break;
-	 *             }
-	 *         }
-	 *     }
-	 *
-	 *   return new SearchTree(v, parent, searchOrder);
-	 * }
-	*/
-	public SearchTree dfsNonRecurs(int v) {
-		// Will store what vertex leads to it
-		int[] parent = new int[vertices.size()];
-		for (int i = 0; i < parent.length; i++)
-			parent[i] = -1; // Initialize parent[i] to -1
-		// Mark visited vertices
-		boolean[] isVisited = new boolean[vertices.size()];
-		// Finish dfs order
-		List<Integer> searchOrder = new ArrayList<>();
-		// Used to keep track of vertices left to track
-		Stack<Integer> stack = new Stack<>();
-		
-		stack.push(v);
-		searchOrder.add(v);
-		isVisited[v] = true;
-		
-		while(!stack.isEmpty()) {
-			int x = stack.peek();
-			if(neighbors.get(x).size() == 0) {
-				stack.pop();
-			}
-			else {
-				for(int i=0; i<neighbors.get(x).size(); i++) {
-					Edge e = neighbors.get(x).get(i);
-					neighbors.get(x).remove(i);
-					
-					if(!isVisited[e.v]) {
-						parent[e.v] = x;
-						stack.push(e.v);
-						isVisited[e.v] = true;
-						searchOrder.add(e.v);
-						break;
-					}
-				}
-			}
-		}
-		
-		return new SearchTree(v, parent, searchOrder);
 	}
 
 	/** Create adjacency lists for each vertex */
@@ -160,7 +82,7 @@ public class UnweightedGraph<V> implements Graph<V> {
 		List<Integer> result = new ArrayList<>();
 		for (Edge e: neighbors.get(index))
 			result.add(e.v);
-		
+
 		return result;
 	}
 
@@ -175,7 +97,7 @@ public class UnweightedGraph<V> implements Graph<V> {
 			System.out.print(getVertex(u) + " (" + u + "): ");
 			for (Edge e: neighbors.get(u)) {
 				System.out.print("(" + getVertex(e.u) + ", " +
-					getVertex(e.v) + ") ");
+						getVertex(e.v) + ") ");
 			}
 			System.out.println();
 		}
@@ -186,7 +108,7 @@ public class UnweightedGraph<V> implements Graph<V> {
 		vertices.clear();
 		neighbors.clear();
 	}
-	
+
 	@Override /** Add a vertex to the graph */  
 	public boolean addVertex(V vertex) {
 		if (!vertices.contains(vertex)) {
@@ -199,14 +121,14 @@ public class UnweightedGraph<V> implements Graph<V> {
 		}
 	}
 
-	@Override /** Add an edge to the graph */  
+	/** Add an edge to the graph */  
 	public boolean addEdge(Edge e) {
 		if (e.u < 0 || e.u > getSize() - 1)
 			throw new IllegalArgumentException("No such index: " + e.u);
 
 		if (e.v < 0 || e.v > getSize() - 1)
 			throw new IllegalArgumentException("No such index: " + e.v);
-		
+
 		if (!neighbors.get(e.u).contains(e)) {
 			neighbors.get(e.u).add(e);
 			return true;
@@ -215,12 +137,12 @@ public class UnweightedGraph<V> implements Graph<V> {
 			return false;
 		}
 	}
-	
+
 	@Override /** Add an edge to the graph */  
 	public boolean addEdge(int u, int v) {
 		return addEdge(new Edge(u, v));
 	}
-	
+
 	@Override /** Obtain a DFS tree starting from vertex u */
 	/** To be discussed in Section 28.7 */
 	public SearchTree dfs(int v) {
@@ -263,7 +185,7 @@ public class UnweightedGraph<V> implements Graph<V> {
 			parent[i] = -1; // Initialize parent[i] to -1
 
 		java.util.LinkedList<Integer> queue =
-			new java.util.LinkedList<>(); // list used as a queue
+				new java.util.LinkedList<>(); // list used as a queue
 		boolean[] isVisited = new boolean[vertices.size()];
 		queue.offer(v); // Enqueue v
 		isVisited[v] = true; // Mark it visited
@@ -317,7 +239,7 @@ public class UnweightedGraph<V> implements Graph<V> {
 		public int getNumberOfVerticesFound() {
 			return searchOrder.size();
 		}
-		
+
 		/** Return the path of vertices from a vertex to the root */
 		public List<V> getPath(int index) {
 			ArrayList<V> path = new ArrayList<>();
@@ -335,7 +257,7 @@ public class UnweightedGraph<V> implements Graph<V> {
 		public void printPath(int index) {
 			List<V> path = getPath(index);
 			System.out.print("A path from " + vertices.get(root) + " to " +
-				vertices.get(index) + ": ");
+					vertices.get(index) + ": ");
 			for (int i = path.size() - 1; i >= 0; i--)
 				System.out.print(path.get(i) + " ");
 		}
@@ -348,10 +270,73 @@ public class UnweightedGraph<V> implements Graph<V> {
 				if (parent[i] != -1) {
 					// Display an edge
 					System.out.print("(" + vertices.get(parent[i]) + ", " +
-						vertices.get(i) + ") ");
+							vertices.get(i) + ") ");
 				}
 			}
 			System.out.println();
 		}
+	}
+	public List<Integer> getACycle() {
+		List<Integer> allVerts = new ArrayList<Integer>(); //list containing all vertices
+		for(int i=0; i<vertices.size(); i++) {
+			allVerts.add(i);
+			//System.out.println(i); 
+		}
+		boolean[] isVisited = new boolean[vertices.size()]; //array showing whether or not a vertex has been visited 
+		int[] parent = new int[vertices.size()]; //array that can determine the parent of vertex
+		for (int i = 0; i < parent.length; i++)
+			parent[i] = -1; // Initialize parent[i] to -1
+		while(allVerts.size() > 0) {
+			int v = allVerts.get(0);
+			Stack<Integer> stack = new Stack<Integer>();
+			stack.push(v);
+			isVisited[v] = true;
+			allVerts.remove(new Integer(v));
+			while(!stack.isEmpty()) {
+				int x = stack.peek();
+				if(neighbors.get(x).size() == 0) {
+					stack.pop();
+				}
+				else {
+					for(int i=0; i<neighbors.get(x).size(); i++) {
+						Edge e = neighbors.get(x).get(i);
+						if(!isVisited[e.v]) {
+							parent[e.v] = x;
+							stack.push(e.v);
+							isVisited[e.v] = true;
+							allVerts.remove(new Integer(e.v));
+							neighbors.get(x).remove(i);
+							break;
+						}
+						else if(e.v != parent[x]) {
+							List<Integer> list = new ArrayList<Integer>();
+							list.add(e.v);
+							while(x != e.v && x != -1) {
+								list.add(x);
+								x = parent[x];
+							}
+							return list;
+						}
+						else {
+							neighbors.get(x).remove(i);
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+}
+
+class Edge { 
+	int u;
+	int v;
+
+	public Edge(int u, int v) { this.u = u;
+	this.v = v;
+	}
+
+	public boolean equals(Object o) {
+		return u == ((Edge)o).u && v == ((Edge)o).v;
 	}
 }
