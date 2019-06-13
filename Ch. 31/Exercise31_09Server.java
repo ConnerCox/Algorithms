@@ -51,11 +51,11 @@ public class Exercise31_09Server extends Application {
 		taMessage.setOnKeyPressed(e -> { 
 			if(e.getCode() == KeyCode.ENTER) {
 				try {
-					String message = taMessage.getText();
+					String message = taMessage.getText().trim();
 					toClient.writeUTF(message);
 					taMessage.clear();
 					Platform.runLater(() -> {
-						taHistory.appendText("S: " + message); //TODO: Write to History
+						taHistory.appendText("S: " + message+ "\n");
 					});
 				}
 				catch (IOException ex) {
@@ -81,10 +81,11 @@ public class Exercise31_09Server extends Application {
 				
 				//receive messages
 				while (true) {
-					String message = fromClient.readUTF();
+					String message = fromClient.readUTF().trim();
 
 					Platform.runLater(() -> {
 						taHistory.appendText("C: " + message + "\n");
+						taMessage.clear();
 						taMessage.clear();
 					});
 				}
