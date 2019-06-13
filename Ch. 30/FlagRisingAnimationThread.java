@@ -20,12 +20,7 @@ public class FlagRisingAnimationThread extends Application {
 		// Add an image view and add it to pane
 		ImageView imageView = new ImageView("us.gif");
 		pane.getChildren().add(imageView);
-
-		// Create a path transition
-		PathTransition pt = new PathTransition(Duration.millis(10000),
-				new Line(100, 200, 100, 0), imageView); 
-		pt.setCycleCount(5);
-		pt.play(); // Start animation
+		imageView.setY(200);
 
 		// Create a scene and place it in the stage
 		Scene scene = new Scene(pane, 250, 200); 
@@ -36,8 +31,8 @@ public class FlagRisingAnimationThread extends Application {
 		new Thread(()-> {
 			try {
 				while(true) {
-					Platform.runLater(()->imageView.setY(imageView.getY()+1));
-					Thread.sleep(200);
+					Platform.runLater(()->imageView.setY(imageView.getY()-1));
+					Thread.sleep(50);
 				}
 			} 
 			catch (InterruptedException e) {
