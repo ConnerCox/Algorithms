@@ -196,7 +196,7 @@ public class GunApplicationWindow {
 		btnNewButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				System.out.println("Mouse was clicked");
+				System.out.println("Mouse was clicked"); //TODO: take all info from txfields, make new gun object, store it
 			}
 		});
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
