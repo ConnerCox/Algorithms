@@ -305,8 +305,8 @@ public class GunApplicationWindow {
 		tabbedPane.addTab("Search Guns", null, searchPanel, null);
 		searchPanel.setLayout(null);
 		
-		JLabel lblSearchBy = new JLabel("Search by…");
-		lblSearchBy.setBounds(6, 6, 100, 16);
+		JLabel lblSearchBy = new JLabel("Sort by…");
+		lblSearchBy.setBounds(186, 6, 57, 16);
 		searchPanel.add(lblSearchBy);
 		
 		btnBrand = new JButton("Brand");
@@ -314,19 +314,19 @@ public class GunApplicationWindow {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		btnBrand.setBounds(105, 34, 75, 29);
+		btnBrand.setBounds(125, 34, 75, 29);
 		searchPanel.add(btnBrand);
 		
 		btnAll = new JButton("All");
-		btnAll.setBounds(15, 34, 75, 29);
+		btnAll.setBounds(25, 34, 75, 29);
 		searchPanel.add(btnAll);
 		
 		btnCaliber = new JButton("Caliber");
-		btnCaliber.setBounds(195, 34, 75, 29);
+		btnCaliber.setBounds(225, 34, 75, 29);
 		searchPanel.add(btnCaliber);
 		
 		btnValue = new JButton("Value");
-		btnValue.setBounds(285, 34, 75, 29);
+		btnValue.setBounds(325, 34, 75, 29);
 		searchPanel.add(btnValue);
 		
 		JScrollPane scrollPane = new JScrollPane();
