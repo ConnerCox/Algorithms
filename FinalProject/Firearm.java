@@ -1,16 +1,17 @@
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import javafx.scene.image.Image;
 
 public class Firearm {
 	//attributes of a Firearm
-	public Image image;
-	public String brand;
-	public String model;
-	public String serialNum;
-	public String caliber;
-	public ArrayList<String> attachments;
-	public double estValue;
-	public String notes;
+	private BufferedImage image;
+	private String brand;
+	private String model;
+	private String serialNum;
+	private String caliber;
+	private ArrayList<String> attachments;
+	private double estValue;
+	private String notes;
 	
 	//zero arg constructor
 	public Firearm() {
@@ -25,7 +26,7 @@ public class Firearm {
 	}
 	
 	//constructor
-	public Firearm(Image image, String brand, String model, String serialNum, String caliber,
+	public Firearm(BufferedImage image, String brand, String model, String serialNum, String caliber,
 			ArrayList<String> attachments, double estValue, String notes) {
 
 		this.image = image;
@@ -39,7 +40,7 @@ public class Firearm {
 	}
 	
 	//getters
-	public Image getImage() {
+	public BufferedImage getImage() {
 		return image;
 	}
 	public String getBrand() {
@@ -65,7 +66,7 @@ public class Firearm {
 	}
 	
 	//setters
-	public void setImage(Image image) {
+	public void setImage(BufferedImage image) {
 		this.image = image;
 	}
 	public void setBrand(String brand) {

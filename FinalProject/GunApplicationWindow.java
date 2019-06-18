@@ -2,26 +2,38 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import java.awt.GridBagLayout;
+
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import javax.swing.JLabel;
-import java.awt.BorderLayout;
-import javax.swing.SwingConstants;
 import javax.swing.JTextField;
-import net.miginfocom.swing.MigLayout;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import java.awt.GridLayout;
-import java.awt.Color;
 import javax.swing.JPanel;
-import java.awt.Component;
-import javax.swing.Box;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import javafx.scene.image.Image;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.SwingConstants;
+import javax.swing.ScrollPaneConstants;
 
 public class GunApplicationWindow {
 
@@ -29,14 +41,23 @@ public class GunApplicationWindow {
 	private JTextField tfBrand;
 	private JTextField tfModel;
 	private JTextField tfSerialNum;
-	private JTextField tfAttachments;
-	private JTextField tfCaliber;
 	private JTextField tfEstValue;
+	private JTextField tfCaliber;
+	private JTextField tfAttachments;
 	private JTabbedPane tabbedPane;
 	private JPanel inputPanel;
-	private JScrollPane scrollableSearchPanel;
 	private JLabel lblTop;
-	private JButton btnNewButton;
+	private JButton btnEnterGun;
+	private JButton btnUploadImage;
+	private JLabel lblImageSelected;
+	private JLabel lblStatus;
+	private JPanel searchPanel;
+	private JButton btnBrand;
+	private JButton btnAll;
+	private JButton btnCaliber;
+	private JButton btnValue;
+	private JLabel lblNotes;
+	private JTextField tfNotes;
 
 	/**
 	 * Launch the application.
@@ -65,8 +86,14 @@ public class GunApplicationWindow {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		//TODO: all things that need to persist
+		List<Firearm> gunCollection = new ArrayList<Firearm>();
+		BufferedImage image = null;
+
+
+
 		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 400);
+		frame.setBounds(100, 100, 450, 450);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0};
@@ -74,140 +101,239 @@ public class GunApplicationWindow {
 		gridBagLayout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
 		gridBagLayout.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 		frame.getContentPane().setLayout(gridBagLayout);
-		
+
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
 		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
 		gbc_tabbedPane.gridx = 0;
 		gbc_tabbedPane.gridy = 0;
 		frame.getContentPane().add(tabbedPane, gbc_tabbedPane);
-		
+
 		inputPanel = new JPanel();
 		tabbedPane.addTab("Input Guns", null, inputPanel, null);
-		GridBagLayout gbl_inputPanel = new GridBagLayout();
-		gbl_inputPanel.columnWidths = new int[]{207, 0, 0};
-		gbl_inputPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_inputPanel.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
-		gbl_inputPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		inputPanel.setLayout(gbl_inputPanel);
-		
+		inputPanel.setLayout(null);
+
 		lblTop = new JLabel("Enter info about the gun you with to add.");
-		GridBagConstraints gbc_lblTop = new GridBagConstraints();
-		gbc_lblTop.gridwidth = 2;
-		gbc_lblTop.insets = new Insets(10, 0, 10, 0);
-		gbc_lblTop.gridx = 0;
-		gbc_lblTop.gridy = 0;
-		inputPanel.add(lblTop, gbc_lblTop);
-		
+		lblTop.setBounds(85, 10, 259, 16);
+		inputPanel.add(lblTop);
+
 		JLabel lblBrand = new JLabel("Enter brand: ");
-		GridBagConstraints gbc_lblBrand = new GridBagConstraints();
-		gbc_lblBrand.insets = new Insets(0, 0, 5, 5);
-		gbc_lblBrand.gridx = 0;
-		gbc_lblBrand.gridy = 1;
-		inputPanel.add(lblBrand, gbc_lblBrand);
-		
+		lblBrand.setBounds(115, 41, 80, 16);
+		inputPanel.add(lblBrand);
+
 		tfBrand = new JTextField();
-		GridBagConstraints gbc_tfBrand = new GridBagConstraints();
-		gbc_tfBrand.insets = new Insets(0, 0, 5, 0);
-		gbc_tfBrand.gridx = 1;
-		gbc_tfBrand.gridy = 1;
-		inputPanel.add(tfBrand, gbc_tfBrand);
+		tfBrand.setBounds(215, 38, 200, 26);
+		inputPanel.add(tfBrand);
 		tfBrand.setColumns(10);
-		
+
 		JLabel lblModel = new JLabel("Enter model: ");
-		GridBagConstraints gbc_lblModel = new GridBagConstraints();
-		gbc_lblModel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblModel.gridx = 0;
-		gbc_lblModel.gridy = 2;
-		inputPanel.add(lblModel, gbc_lblModel);
-		
+		lblModel.setBounds(112, 72, 83, 16);
+		inputPanel.add(lblModel);
+
 		tfModel = new JTextField();
-		GridBagConstraints gbc_tfModel = new GridBagConstraints();
-		gbc_tfModel.insets = new Insets(0, 0, 5, 0);
-		gbc_tfModel.gridx = 1;
-		gbc_tfModel.gridy = 2;
-		inputPanel.add(tfModel, gbc_tfModel);
+		tfModel.setBounds(215, 69, 200, 26);
+		inputPanel.add(tfModel);
 		tfModel.setColumns(10);
-		
+
 		JLabel lblSerialNum = new JLabel("Serial number: ");
-		GridBagConstraints gbc_lblSerialNum = new GridBagConstraints();
-		gbc_lblSerialNum.insets = new Insets(0, 0, 5, 5);
-		gbc_lblSerialNum.gridx = 0;
-		gbc_lblSerialNum.gridy = 3;
-		inputPanel.add(lblSerialNum, gbc_lblSerialNum);
-		
+		lblSerialNum.setBounds(101, 103, 94, 16);
+		inputPanel.add(lblSerialNum);
+
 		tfSerialNum = new JTextField();
-		GridBagConstraints gbc_tfSerialNum = new GridBagConstraints();
-		gbc_tfSerialNum.insets = new Insets(0, 0, 5, 0);
-		gbc_tfSerialNum.gridx = 1;
-		gbc_tfSerialNum.gridy = 3;
-		inputPanel.add(tfSerialNum, gbc_tfSerialNum);
+		tfSerialNum.setBounds(215, 100, 200, 26);
+		inputPanel.add(tfSerialNum);
 		tfSerialNum.setColumns(10);
-		
+
 		JLabel lblCaliber = new JLabel("Enter the caliber: ");
-		GridBagConstraints gbc_lblCaliber = new GridBagConstraints();
-		gbc_lblCaliber.insets = new Insets(0, 0, 5, 5);
-		gbc_lblCaliber.gridx = 0;
-		gbc_lblCaliber.gridy = 4;
-		inputPanel.add(lblCaliber, gbc_lblCaliber);
-		
+		lblCaliber.setBounds(85, 134, 110, 16);
+		inputPanel.add(lblCaliber);
+
 		tfCaliber = new JTextField();
-		GridBagConstraints gbc_tfCaliber = new GridBagConstraints();
-		gbc_tfCaliber.insets = new Insets(0, 0, 5, 0);
-		gbc_tfCaliber.gridx = 1;
-		gbc_tfCaliber.gridy = 4;
-		inputPanel.add(tfCaliber, gbc_tfCaliber);
+		tfCaliber.setBounds(215, 131, 200, 26);
+		inputPanel.add(tfCaliber);
 		tfCaliber.setColumns(10);
-		
+
 		JTextArea lblAttachments = new JTextArea("Enter attachments\n(seperated by a comma):");
+		lblAttachments.setBounds(42, 193, 153, 32);
 		lblAttachments.setBackground(UIManager.getColor("Button.background"));
 		lblAttachments.setEditable(false);
-//		lblAttachments.setHorizontalAlignment(SwingConstants.RIGHT);
-		GridBagConstraints gbc_lblAttachments = new GridBagConstraints();
-		gbc_lblAttachments.insets = new Insets(0, 0, 5, 5);
-		gbc_lblAttachments.gridx = 0;
-		gbc_lblAttachments.gridy = 5;
-		inputPanel.add(lblAttachments, gbc_lblAttachments);
-		
-		tfAttachments = new JTextField();
-		GridBagConstraints gbc_tfAttachments = new GridBagConstraints();
-		gbc_tfAttachments.insets = new Insets(0, 0, 5, 0);
-		gbc_tfAttachments.gridx = 1;
-		gbc_tfAttachments.gridy = 5;
-		inputPanel.add(tfAttachments, gbc_tfAttachments);
-		tfAttachments.setColumns(10);
-		
-		JLabel lblEstValue = new JLabel("Estimated value: ");
-		GridBagConstraints gbc_lblEstValue = new GridBagConstraints();
-		gbc_lblEstValue.insets = new Insets(0, 0, 5, 5);
-		gbc_lblEstValue.gridx = 0;
-		gbc_lblEstValue.gridy = 6;
-		inputPanel.add(lblEstValue, gbc_lblEstValue);
-		
+		inputPanel.add(lblAttachments);
+
 		tfEstValue = new JTextField();
-		GridBagConstraints gbc_tfEstValue = new GridBagConstraints();
-		gbc_tfEstValue.insets = new Insets(0, 0, 5, 0);
-		gbc_tfEstValue.gridx = 1;
-		gbc_tfEstValue.gridy = 6;
-		inputPanel.add(tfEstValue, gbc_tfEstValue);
+		tfEstValue.setBounds(215, 165, 200, 26);
+		inputPanel.add(tfEstValue);
 		tfEstValue.setColumns(10);
-		
-		btnNewButton = new JButton("Enter Gun");
-		btnNewButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				System.out.println("Mouse was clicked"); //TODO: take all info from txfields, make new gun object, store it
+
+		JLabel lblEstValue = new JLabel("Estimated value: ");
+		lblEstValue.setBounds(88, 162, 107, 16);
+		inputPanel.add(lblEstValue);
+
+		tfAttachments = new JTextField();
+		tfAttachments.setBounds(215, 199, 200, 26);
+		inputPanel.add(tfAttachments);
+		tfAttachments.setColumns(10);
+
+		btnUploadImage = new JButton("Upload Image");
+		btnUploadImage.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.gridwidth = 2;
-		gbc_btnNewButton.insets = new Insets(0, 0, 0, 5);
-		gbc_btnNewButton.gridx = 0;
-		gbc_btnNewButton.gridy = 7;
-		inputPanel.add(btnNewButton, gbc_btnNewButton);
-		
-		scrollableSearchPanel = new JScrollPane();
-		tabbedPane.addTab("Search Guns", null, scrollableSearchPanel, null);
-	}
+		btnUploadImage.setBounds(67, 269, 130, 29);
+		btnUploadImage.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				JFileChooser chooser = new JFileChooser();
+				FileNameExtensionFilter filter = new FileNameExtensionFilter(
+						"JPG & PNG Images", "jpg", "png", "jpeg");
+				chooser.setFileFilter(filter);
+				int returnVal = chooser.showOpenDialog(chooser);
+				if(returnVal == JFileChooser.APPROVE_OPTION) {
+					File imageFile = chooser.getSelectedFile();
+					try {
+						lblImageSelected.setText(imageFile.getName());
+						BufferedImage img = ImageIO.read(imageFile);
+					} catch (IOException e2) {
+						lblImageSelected.setText("Failed to read image");
+					}
+					//TODO: idk maybe somthing else here  
 
+				}
+			}
+		});
+		inputPanel.add(btnUploadImage);
+
+		lblImageSelected = new JLabel("no image selected");
+		lblImageSelected.setBounds(215, 274, 200, 16);
+		inputPanel.add(lblImageSelected);
+
+		btnEnterGun = new JButton("     Enter Gun     ");
+		btnEnterGun.setBounds(10, 347, 145, 29);
+		btnEnterGun.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				try {
+					//if there is something written in the first and second to last slot, record and store new firearm
+					if(!tfBrand.getText().equals("") && !tfEstValue.getText().equals("")) {
+						//TODO: test
+						System.out.println("Here1");
+						
+						String brand = tfBrand.getText().trim();
+						String model = tfModel.getText().trim();
+						String serialNum = tfSerialNum.getText().trim();
+						String caliber = tfCaliber.getText().trim();
+						System.out.println("Here2");
+						String[] att = tfAttachments.getText().split(",");
+						ArrayList<String> attachments = new ArrayList<String> (Arrays.asList(att));
+						
+						attachments.forEach(each -> each.trim());
+						
+						String toParse = tfEstValue.getText().replace('$', ' ').trim();
+						System.out.println("'" + toParse + "'");
+						double estValue = Double.parseDouble(toParse);
+						System.out.println("Here2.0");
+						String notes = tfNotes.getText().trim();
+						
+												
+						
+						//add gun to records
+						Firearm gunToAdd = new Firearm(image, brand, model, serialNum, caliber, attachments, estValue, notes);
+						gunCollection.add(gunToAdd);
+						
+						//clear text fields
+						tfBrand.setText("");
+						tfModel.setText("");
+						tfSerialNum.setText("");
+						tfCaliber.setText("");
+						tfEstValue.setText("");
+						
+						//TODO: test
+						System.out.println("Here3");
+						
+						//Update the user that the gun was added successfully
+						new Thread(()-> {
+							try {
+								lblStatus.setText("Added Successfully!");
+								System.out.println("Made it here!");
+								Thread.sleep(4000);
+								lblStatus.setText("Awaiting input...");
+							} catch (InterruptedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							
+						}).start();
+						
+					}
+					//else update the user that they need to fill in the fields
+					else {
+						new Thread(()-> {
+							try {
+								lblStatus.setText("Please fill in all the fields");
+								Thread.sleep(4000);
+								lblStatus.setText("Awaiting input...");
+							} catch (InterruptedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							
+						}).start();
+					}
+				} catch (Exception e2) {
+					// TODO: handle exception
+				}
+			}
+		});
+
+		lblStatus = new JLabel("Awaiting input...");
+		lblStatus.setHorizontalAlignment(SwingConstants.CENTER);
+		lblStatus.setBounds(10, 334, 145, 13);
+		lblStatus.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
+		inputPanel.add(lblStatus);
+		inputPanel.add(btnEnterGun);
+		
+		lblNotes = new JLabel("Notes:");
+		lblNotes.setHorizontalAlignment(SwingConstants.TRAILING);
+		lblNotes.setBounds(88, 237, 107, 16);
+		inputPanel.add(lblNotes);
+		
+		tfNotes = new JTextField();
+		tfNotes.setColumns(10);
+		tfNotes.setBounds(215, 236, 200, 26);
+		inputPanel.add(tfNotes);
+		
+		searchPanel = new JPanel();
+		tabbedPane.addTab("Search Guns", null, searchPanel, null);
+		searchPanel.setLayout(null);
+		
+		JLabel lblSearchBy = new JLabel("Search by…");
+		lblSearchBy.setBounds(6, 6, 100, 16);
+		searchPanel.add(lblSearchBy);
+		
+		btnBrand = new JButton("Brand");
+		btnBrand.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnBrand.setBounds(105, 34, 75, 29);
+		searchPanel.add(btnBrand);
+		
+		btnAll = new JButton("All");
+		btnAll.setBounds(15, 34, 75, 29);
+		searchPanel.add(btnAll);
+		
+		btnCaliber = new JButton("Caliber");
+		btnCaliber.setBounds(195, 34, 75, 29);
+		searchPanel.add(btnCaliber);
+		
+		btnValue = new JButton("Value");
+		btnValue.setBounds(285, 34, 75, 29);
+		searchPanel.add(btnValue);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(6, 63, 417, 313);
+		searchPanel.add(scrollPane);
+		
+		JPanel deletionPanel = new JPanel();
+		tabbedPane.addTab("Delete a Gun", null, deletionPanel, null);
+	}
 }
