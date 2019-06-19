@@ -1,6 +1,13 @@
+/*
+ * Author: Conner Cox
+ * Date: June 19, 2019
+ * 
+ * Description: This is the firearm class that is used in GunApplicationWindow.java. 
+ * It defines the attributes of a firearm object.
+ */
+
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import javafx.scene.image.Image;
 
 public class Firearm {
 	//attributes of a Firearm
