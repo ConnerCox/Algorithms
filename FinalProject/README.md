@@ -10,6 +10,13 @@ I was motivated to create this project due to having multiple family members inq
 
 Download all of the files and run GunApplicationWindow.java with your favorite IDE. 
 
+
+## GUI Example
+
+This is how the GUI looks:
+
+<img src="GUI.png" />
+
 ## Code Example
 
 This snippet is the first half of what happens when a user enters a gun.
