@@ -18,6 +18,7 @@ import javax.swing.JFileChooser;
 import java.awt.GridBagConstraints;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
@@ -36,17 +37,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.awt.Font;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
 import javax.swing.JTable;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class GunApplicationWindow {
 
@@ -82,7 +80,7 @@ public class GunApplicationWindow {
 	private JScrollPane scrollPane;
 	//gun collection file
 	File gunFile;
-	//Empty table
+	//Empty table and model
 	private JTable table;
 	String[] columnNames = {"Brand","Caliber","Model","Serial #","Est. Value","Attachments","Notes"};
 	DefaultTableModel model = new DefaultTableModel(0, columnNames.length);
@@ -146,15 +144,26 @@ public class GunApplicationWindow {
 	private void initialize() {		
 		//Things to do first
 		gunFile = new File("gunCollection.file");
+	
+		//JTable and model
+		model.setColumnIdentifiers(columnNames);
+		table = new JTable(model);
+		table.setFillsViewportHeight(true);
+		
+		//file reading
 		try {
 			//create a file if none exists
 			if(!gunFile.exists()) {
 				gunFile.createNewFile();
+			} else {
+				FileInputStream fi = new FileInputStream(gunFile);
+				ObjectInputStream oi = new ObjectInputStream(fi);
+				gunCollection = (ArrayList<Firearm>) oi.readObject();
+				addSortStoreGuns();
+				oi.close();
+				fi.close();
 			}
-			FileInputStream fi = new FileInputStream(gunFile);
-			ObjectInputStream oi = new ObjectInputStream(fi);
-			gunCollection = (ArrayList<Firearm>) oi.readObject();
-			addSortStoreGuns();
+			
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
 		} catch (IOException e) {
@@ -288,6 +297,7 @@ public class GunApplicationWindow {
 					try {
 						lblImageSelected.setText(imageFile.getName());
 						BufferedImage img = ImageIO.read(imageFile);
+						image = img;
 					} catch (IOException e2) {
 						lblImageSelected.setText("Failed to read image");
 					}
@@ -332,7 +342,9 @@ public class GunApplicationWindow {
 						tfEstValue.setText("");
 						tfAttachments.setText("");
 						tfNotes.setText("");
-
+						
+						//TODO: Set tfBrand to focus
+						tfBrand.requestFocus();
 						
 						//Update the user that the gun was added successfully
 						new Thread(()-> {
@@ -567,13 +579,73 @@ public class GunApplicationWindow {
 		btnSerialNumber.setBounds(275, 1, 75, 29);
 		searchPanel.add(btnSerialNumber);
 		
-		//JTable and model
-		model.setColumnIdentifiers(columnNames);
-		JTable table = new JTable(model);
-		table.setFillsViewportHeight(true);	
+			
 		//ScrollPane
 		scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(6, 59, 417, 317);
+		scrollPane.setBounds(6, 62, 417, 289);
 		searchPanel.add(scrollPane);
+
+		
+		//Display Table
+		//Clear out table
+		int rowCount = model.getRowCount();
+		for(int i=0; i<rowCount; i++) {
+			model.removeRow(0);
+		}
+		
+		//Add appropriate row to scroll pane
+		for(int i=0; i<gunCollection.size(); i++) {
+			Firearm f = gunCollection.get(i);
+			Object[] rowData = {f.getBrand(),
+								f.getCaliber(), 
+								f.getModel(), 
+								f.getSerialNum(),
+								f.getEstValue(),
+								f.getAttachments().toString(),
+								f.getNotes()}; 
+			//add the row
+			model.addRow(rowData);
+			table = new JTable(model);
+			scrollPane = new JScrollPane(table);
+			searchPanel.add(scrollPane);
+		}
+		//Update model, then table
+		table = new JTable(model);
+		scrollPane = new JScrollPane(table);
+		searchPanel.add(scrollPane);
+		
+		JButton btnDelete = new JButton("Delete");
+		btnDelete.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				//if there is only one selected row
+				ListSelectionModel selected = table.getSelectionModel();
+				System.out.println("HERE");
+				System.out.println(selected.isSelectionEmpty());
+				System.out.println(table.getRowSelectionAllowed());
+				
+//				if(Array.getLength(table.getSelectedRows()) == 1) {
+//					//Delete that gun in that row, Column is 4
+//					String serial = model.getValueAt(table.getSelectedRow(), 4).toString();
+//					for (int i = 0; i < gunCollection.size(); i++) {
+//						if(gunCollection.get(i).getSerialNum().equals(serial)) {
+//							gunCollection.remove(i);
+//						}
+//						addSortStoreGuns();
+//					}
+//					
+//					//Update model, then table
+//					table = new JTable(model);
+//					scrollPane = new JScrollPane(table);
+//					searchPanel.add(scrollPane);
+//				}
+			}
+		});
+		btnDelete.setBounds(311, 352, 117, 29);
+		searchPanel.add(btnDelete);
+		
+		JLabel lblToDeleteSelect = new JLabel("To delete, select a gun then press \"Delete\".");
+		lblToDeleteSelect.setBounds(14, 358, 286, 16);
+		searchPanel.add(lblToDeleteSelect);
 	}
 }
