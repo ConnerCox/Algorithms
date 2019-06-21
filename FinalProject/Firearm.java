@@ -7,9 +7,10 @@
  */
 
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Firearm {
+public class Firearm implements Serializable {
 	//attributes of a Firearm
 	private BufferedImage image;
 	private String brand;
@@ -98,5 +99,10 @@ public class Firearm {
 		this.notes = notes;
 	}
 	
+	@Override
+	public String toString() {
+		String s = "Brand: "+brand+", Model: "+model+", Serial Number: "+serialNum+", Caliber: "+caliber+", Attachments: "+attachments+", EstValue: "+estValue+", and Notes: "+notes;
+		return s;
+	}
 	
 }

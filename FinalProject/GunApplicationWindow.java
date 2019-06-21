@@ -10,7 +10,6 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import java.awt.GridBagLayout;
-import java.awt.ScrollPane;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -25,12 +24,18 @@ import javax.swing.JScrollPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +44,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JList;
+import javax.swing.JTable;
 
 public class GunApplicationWindow {
 
@@ -64,7 +71,21 @@ public class GunApplicationWindow {
 	private JButton btnValue;
 	private JLabel lblNotes;
 	private JTextField tfNotes;
-	private JList searchList;
+	//things that need to persist can go here
+	ArrayList<Firearm> gunCollection = new ArrayList<Firearm>();
+	ArrayList<Firearm> gunSortedModel = new ArrayList<Firearm>(gunCollection);
+	ArrayList<Firearm> gunSortedBrand = new ArrayList<Firearm>(gunCollection);
+	ArrayList<Firearm> gunSortedCaliber = new ArrayList<Firearm>(gunCollection);
+	ArrayList<Firearm> gunSortedSerial = new ArrayList<Firearm>(gunCollection);
+	ArrayList<Firearm> gunSortedValue = new ArrayList<Firearm>(gunCollection);
+	BufferedImage image = null;
+	private JScrollPane scrollPane;
+	//gun collection file
+	File gunFile;
+	//Empty table
+	private JTable table;
+	String[] columnNames = {"Brand","Caliber","Model","Serial #","Est. Value","Attachments","Notes"};
+	DefaultTableModel model = new DefaultTableModel(0, columnNames.length);
 
 	/**
 	 * Launch the application.
@@ -88,33 +109,61 @@ public class GunApplicationWindow {
 	public GunApplicationWindow() {
 		initialize();
 	}
-
+	
 	/**
-	 * Initialize the contents of the frame.
+	 * A method that add and then sorts any guns added to the collection
 	 */
-	private void initialize() {
-		//TODO: all things that need to persist
-		BufferedImage image = null;
-
-		
-
-		
-		//initialize gun collection
-		
-		//Entire collection (also recent collection)
-		ArrayList<Firearm> gunCollection = new ArrayList<Firearm>();
-		//A different list for each sortable collection
-		ArrayList<Firearm> gunSortedModel = new ArrayList<Firearm>(gunCollection);
-		ArrayList<Firearm> gunSortedBrand = new ArrayList<Firearm>(gunCollection);
-		ArrayList<Firearm> gunSortedCaliber = new ArrayList<Firearm>(gunCollection);
-		ArrayList<Firearm> gunSortedSerial = new ArrayList<Firearm>(gunCollection);
-		ArrayList<Firearm> gunSortedValue = new ArrayList<Firearm>(gunCollection);
+	public void addSortStoreGuns() {
+		//update each sorted list with the complete list of guns
+		gunSortedModel = new ArrayList<Firearm>(gunCollection);
+		gunSortedBrand = new ArrayList<Firearm>(gunCollection);
+		gunSortedCaliber = new ArrayList<Firearm>(gunCollection);
+		gunSortedSerial = new ArrayList<Firearm>(gunCollection);
+		gunSortedValue = new ArrayList<Firearm>(gunCollection);
+		//sort each list with its respective comparator
 		gunSortedModel.sort(new FirearmComparatorByModel());
 		gunSortedBrand.sort(new FirearmComparatorByBrand());
 		gunSortedCaliber.sort(new FirearmComparatorByCaliber());
 		gunSortedSerial.sort(new FirearmComparatorBySerial());
 		gunSortedValue.sort(new FirearmComparatorByValue());
+		
+		//store into file
+		try {
+			FileOutputStream f = new FileOutputStream(gunFile);
+			ObjectOutputStream o = new ObjectOutputStream(f);
+			o.writeObject(gunCollection);
+			o.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+		} catch (IOException e) {
+			System.out.println("Error initializing stream");
+		}
+	}
 
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {		
+		//Things to do first
+		gunFile = new File("gunCollection.file");
+		try {
+			//create a file if none exists
+			if(!gunFile.exists()) {
+				gunFile.createNewFile();
+			}
+			FileInputStream fi = new FileInputStream(gunFile);
+			ObjectInputStream oi = new ObjectInputStream(fi);
+			gunCollection = (ArrayList<Firearm>) oi.readObject();
+			addSortStoreGuns();
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+		} catch (IOException e) {
+			System.out.println("Error initializing stream");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		addSortStoreGuns();
 		
 		//Frame
 		frame = new JFrame();
@@ -134,12 +183,7 @@ public class GunApplicationWindow {
 		gbc_tabbedPane.gridx = 0;
 		gbc_tabbedPane.gridy = 0;
 		frame.getContentPane().add(tabbedPane, gbc_tabbedPane);
-		
-		//Search Panel Scroll Pane (Display Guns here)
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(6, 63, 417, 313);
-		searchPanel.add(scrollPane);
-		
+				
 		//Input panel tab
 		inputPanel = new JPanel();
 		tabbedPane.addTab("Input Guns", null, inputPanel, null);
@@ -233,7 +277,6 @@ public class GunApplicationWindow {
 		btnUploadImage.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				//TODO: choose image file
 				JFileChooser chooser = new JFileChooser();
 				FileNameExtensionFilter filter = new FileNameExtensionFilter(
 						"JPG & PNG Images", "jpg", "png", "jpeg");
@@ -278,19 +321,23 @@ public class GunApplicationWindow {
 						Firearm gunToAdd = new Firearm(image, brand, model, serialNum, caliber, attachments, estValue, notes);
 						gunCollection.add(gunToAdd);
 						
+						//update all gun lists
+						addSortStoreGuns();
+						
 						//clear text fields
 						tfBrand.setText("");
 						tfModel.setText("");
 						tfSerialNum.setText("");
 						tfCaliber.setText("");
 						tfEstValue.setText("");
+						tfAttachments.setText("");
+						tfNotes.setText("");
 
 						
 						//Update the user that the gun was added successfully
 						new Thread(()-> {
 							try {
 								lblStatus.setText("Added Successfully!");
-								System.out.println("Made it here!");
 								Thread.sleep(4000);
 								lblStatus.setText("Awaiting input...");
 							} catch (InterruptedException e1) {
@@ -338,10 +385,28 @@ public class GunApplicationWindow {
 		btnBrand.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				//TODO: Add appropriate list to scroll pane
-				searchList = new JList();
-				scrollPane.setViewportView(searchList);
-
+				//Clear out table
+				int rowCount = model.getRowCount();
+				for(int i=0; i<rowCount; i++) {
+					model.removeRow(0);
+				}
+				
+				//Add appropriate row to scroll pane
+				for(int i=0; i<gunSortedBrand.size(); i++) {
+					Firearm f = gunSortedBrand.get(i);
+					Object[] rowData = {f.getBrand(),
+										f.getCaliber(), 
+										f.getModel(), 
+										f.getSerialNum(),
+										f.getEstValue(),
+										f.getAttachments().toString(),
+										f.getNotes()}; 
+					//add the row
+					model.addRow(rowData);
+					table = new JTable(model);
+					scrollPane = new JScrollPane(table);
+					searchPanel.add(scrollPane);
+				}
 			}
 		});
 		btnBrand.setBounds(125, 34, 75, 29);
@@ -351,7 +416,28 @@ public class GunApplicationWindow {
 		btnRecent.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				//TODO: Add appropriate list to scroll pane
+				//Clear out table
+				int rowCount = model.getRowCount();
+				for(int i=0; i<rowCount; i++) {
+					model.removeRow(0);
+				}
+				
+				//Add appropriate row to scroll pane
+				for(int i=0; i<gunCollection.size(); i++) {
+					Firearm f = gunCollection.get(i);
+					Object[] rowData = {f.getBrand(),
+										f.getCaliber(), 
+										f.getModel(), 
+										f.getSerialNum(),
+										f.getEstValue(),
+										f.getAttachments().toString(),
+										f.getNotes()}; 
+					//add the row
+					model.addRow(rowData);
+					table = new JTable(model);
+					scrollPane = new JScrollPane(table);
+					searchPanel.add(scrollPane);
+				}
 			}
 		});
 		btnRecent.setBounds(25, 34, 75, 29);
@@ -361,7 +447,28 @@ public class GunApplicationWindow {
 		btnCaliber.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				//TODO: Add appropriate list to scroll pane
+				//Clear out table
+				int rowCount = model.getRowCount();
+				for(int i=0; i<rowCount; i++) {
+					model.removeRow(0);
+				}
+				
+				//Add appropriate row to scroll pane
+				for(int i=0; i<gunSortedCaliber.size(); i++) {
+					Firearm f = gunSortedCaliber.get(i);
+					Object[] rowData = {f.getBrand(),
+										f.getCaliber(), 
+										f.getModel(), 
+										f.getSerialNum(),
+										f.getEstValue(),
+										f.getAttachments().toString(),
+										f.getNotes()}; 
+					//add the row
+					model.addRow(rowData);
+					table = new JTable(model);
+					scrollPane = new JScrollPane(table);
+					searchPanel.add(scrollPane);
+				}
 			}
 		});
 		btnCaliber.setBounds(225, 34, 75, 29);
@@ -371,7 +478,28 @@ public class GunApplicationWindow {
 		btnValue.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				//TODO: Add appropriate list to scroll pane
+				//Clear out table
+				int rowCount = model.getRowCount();
+				for(int i=0; i<rowCount; i++) {
+					model.removeRow(0);
+				}
+				
+				//Add appropriate row to scroll pane
+				for(int i=0; i<gunSortedValue.size(); i++) {
+					Firearm f = gunSortedValue.get(i);
+					Object[] rowData = {f.getBrand(),
+										f.getCaliber(), 
+										f.getModel(), 
+										f.getSerialNum(),
+										f.getEstValue(),
+										f.getAttachments().toString(),
+										f.getNotes()}; 
+					//add the row
+					model.addRow(rowData);
+					table = new JTable(model);
+					scrollPane = new JScrollPane(table);
+					searchPanel.add(scrollPane);
+				}
 			}
 		});
 		btnValue.setBounds(325, 34, 75, 29);
@@ -381,7 +509,28 @@ public class GunApplicationWindow {
 		btnModel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				//TODO: Add appropriate list to scroll pane
+				//Clear out table
+				int rowCount = model.getRowCount();
+				for(int i=0; i<rowCount; i++) {
+					model.removeRow(0);
+				}
+				
+				//Add appropriate row to scroll pane
+				for(int i=0; i<gunSortedModel.size(); i++) {
+					Firearm f = gunSortedModel.get(i);
+					Object[] rowData = {f.getBrand(),
+										f.getCaliber(), 
+										f.getModel(), 
+										f.getSerialNum(),
+										f.getEstValue(),
+										f.getAttachments().toString(),
+										f.getNotes()}; 
+					//add the row
+					model.addRow(rowData);
+					table = new JTable(model);
+					scrollPane = new JScrollPane(table);
+					searchPanel.add(scrollPane);
+				}
 			}
 		});
 		btnModel.setBounds(75, 1, 75, 29);
@@ -391,14 +540,40 @@ public class GunApplicationWindow {
 		btnSerialNumber.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				//TODO: Add appropriate list to scroll pane
+				//Clear out table
+				int rowCount = model.getRowCount();
+				for(int i=0; i<rowCount; i++) {
+					model.removeRow(0);
+				}
+				
+				//Add appropriate row to scroll pane
+				for(int i=0; i<gunSortedSerial.size(); i++) {
+					Firearm f = gunSortedSerial.get(i);
+					Object[] rowData = {f.getBrand(),
+										f.getCaliber(), 
+										f.getModel(), 
+										f.getSerialNum(),
+										f.getEstValue(),
+										f.getAttachments().toString(),
+										f.getNotes()}; 
+					//add the row
+					model.addRow(rowData);
+					table = new JTable(model);
+					scrollPane = new JScrollPane(table);
+					searchPanel.add(scrollPane);
+				}
 			}
 		});
 		btnSerialNumber.setBounds(275, 1, 75, 29);
 		searchPanel.add(btnSerialNumber);
 		
-		//Maybe Ill delete this
-		JPanel deletionPanel = new JPanel();
-		tabbedPane.addTab("Delete a Gun", null, deletionPanel, null);
+		//JTable and model
+		model.setColumnIdentifiers(columnNames);
+		JTable table = new JTable(model);
+		table.setFillsViewportHeight(true);	
+		//ScrollPane
+		scrollPane = new JScrollPane(table);
+		scrollPane.setBounds(6, 59, 417, 317);
+		searchPanel.add(scrollPane);
 	}
 }
